@@ -1,0 +1,51 @@
+[ ] - P2P Mindmeet Talk
+    [ ] - Chat de menssagens P2P
+    [ ] - Video chamada P2P
+    [ ] - Audio chamada P2P
+    [ ] - Piscar bordar ao falar (Speek regonigtion)
+    [ ] - Estilizacao da video chamada
+    [ ] - Sons para deixar a coisa mais divertida
+
+[ ] - Mindmeet Signaling
+    [ ] - Websocket
+    [ ] - Controle e gerenciamento das salas
+
+IDEIAS (Refatoracao e boas praticas)
+- https://github.com/svarunan/serverless-webrtc/blob/master/js/plainwebrtc.js (refactor)
+- https://github.com/anshuthopsee/p2p-webrtc (pass to Vue3 and Tailwind)
+- https://github.com/miroslavpejic85/mirotalk (best practices and ideias)
+
+Desafios:
+1. Preciso de um link para enviar para o meu cliente entrar na chamada. 
+
+Requisitos:
+O link precisa ser único, curto e simples.
+
+2. Fazer a chamada de video funcionar da maneira correta
+
+O meu link por ser unico, precisa ser compartilhado por um meio publico para meu cliente,
+e quando ele entrar no link, ele vai "chamar" o outro participante da chamada para entrar
+em uma chamada de video.
+
+Ou seja o Link criado vai ser um canal que vai ser aberto por um participante e o outro vai
+entrar nesse canal para fazer a chamada de video. esse canal vai esta aberto enquanto um usuario
+estiver na chamada.
+
+3. Fazer a chamada de audio funcionar da maneira correta
+
+4. Fazer o chat funcionar da maneira correta.
+
+O chat deve conter as seguintes informacoes 
+- Nome do usuario
+- Mensagem
+- Data da mensagem  (HH:mm, hora e minuto)
+
+Mensagens:
+"Parece que você está sozinho aqui, que tal chamar um amigo para conversar?" (Mostrar Link da Sala para copiar)
+
+Vai aparecer quando o usuario entrar na sala assim que criar ela.
+
+"Voce foi desconectado da sala" (Mostrar em forma de Toast Message)
+"Voce foi expulso da sala" (Mostrar em forma de Toast Message)
+"Voce deseja aceitar XXXX entrar na sala?" (Mostar em forma de Modal no centro superior da tela)
+"Ops, aconteceu um erro, tente novamente mais tarde" (Mostrar em forma de Toast Message)
