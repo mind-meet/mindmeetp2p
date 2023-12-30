@@ -2,7 +2,7 @@
 import { ref, onBeforeMount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { init, connect, call, setLocalStream } from '../lib/webrtc'
+import { init, connect, call, setLocalStream, get } from '../lib/webrtc'
 import { generateRandomHash } from '../lib/hash-generator'
 
 const route = useRoute();
@@ -24,7 +24,16 @@ async function startCall(username) {
   await init(peerid)
 
   if (!isHost.value) {
-    joinConnection(hostPeerID.value)
+    await joinConnection(hostPeerID.value)
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: true
+    })
+
+    setLocalStream(stream)
+
+    await call(hostPeerID.value)
   }
 
 }
@@ -33,13 +42,11 @@ function openConnection(peerID) {
   // do nothing
 }
 
-function joinConnection(peerID) {
-  connect(peerID)
+async function joinConnection(peerID) {
+  await connect(peerID)
 }
 
-
-function onToggleVideo() {
-  // toggle video
+async function onToggleVideo() {
 }
 
 function onToggleAudio() {
