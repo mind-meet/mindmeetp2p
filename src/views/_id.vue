@@ -29,7 +29,7 @@ where lksadkjh is the peer id of the room host
 </script>
 
 <template>
-  <main>
+  <div>
     Host ID: {{ route.params.id }}
     <!-- Pre Call -->
     <div>
@@ -40,7 +40,7 @@ where lksadkjh is the peer id of the room host
     <div>
       Call
     </div>
-  </main> 
+  </div> 
 </template>
 
 <style scoped>
