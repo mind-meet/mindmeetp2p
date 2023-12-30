@@ -5,6 +5,7 @@
     [ ] - Piscar bordar ao falar (Speek regonigtion)
     [ ] - Estilizacao da video chamada
     [ ] - Sons para deixar a coisa mais divertida
+    [ ] - Icones para deixar interface bonitinha (clipboard, toasts, etc)
 
 [ ] - Mindmeet Signaling
     [ ] - Websocket
@@ -49,3 +50,21 @@ Vai aparecer quando o usuario entrar na sala assim que criar ela.
 "Voce foi expulso da sala" (Mostrar em forma de Toast Message)
 "Voce deseja aceitar XXXX entrar na sala?" (Mostar em forma de Modal no centro superior da tela)
 "Ops, aconteceu um erro, tente novamente mais tarde" (Mostrar em forma de Toast Message)
+"Link da sala copiado com sucesso" (Mostrar em forma de Toast Message)
+
+----------GERAR QR CODE-----------------------------------------------------------------------------------
+
+const input = document.querySelector("input");
+const qrcode = document.querySelector("#qrcode");
+
+document.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    genQRCode();
+  }
+});
+
+function genQRCode() {
+  if (!input.value) return;
+
+  qrcode.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${input.value}`;
+}
