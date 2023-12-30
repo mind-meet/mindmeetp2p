@@ -20,6 +20,18 @@ function startCall(username) {
   // call joinConnection(hostPeerID) function if isHost is false
 }
 
+function onToggleVideo() {
+  // toggle video
+}
+
+function onToggleAudio() {
+  // toggle audio
+}
+
+function onEndCall() {
+  // end call
+}
+
 /**
 # FLOW
 
@@ -68,7 +80,27 @@ where lksadkjh is the peer id of the room host
     <br>
     <!-- Call -->
     <div>
-      Call
+      <div>
+        <div>
+          Local
+          <video id="localStream" autoplay playsinline muted></video>
+        </div>
+        <div>
+          Remote
+          <video id="remoteStream" autoplay playsinline></video>
+        </div>
+      </div>
+      <footer>
+        <button
+          @click="onToggleVideo()"
+        >Toggle Video</button>
+        <button
+          @click="onToggleAudio()"
+        >Toggle Audio</button>
+        <button
+          @click="onEndCall()"
+        >End Call</button>
+      </footer>
     </div>
   </div> 
 </template>
