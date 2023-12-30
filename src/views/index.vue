@@ -21,6 +21,7 @@ function updateRoomKey() {
 
 async function joinRoom(roomKey, isHost = false) {
     if (!roomKey && roomKey.length !== 8) return
+    // TODO: If host=true Check if host already exists here
     await router.push(`/join/${roomKey}` + (isHost ? '?host=true' : ''))
 }
 

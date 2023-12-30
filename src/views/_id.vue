@@ -2,6 +2,9 @@
 import { ref, onBeforeMount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
+import { init, connect, call, setLocalStream } from '../lib/webrtc'
+import { generateRandomHash } from '../lib/hash-generator'
+
 const route = useRoute();
 const router = useRouter();
 
@@ -14,11 +17,26 @@ onBeforeMount(() => {
   router.replace({ query: {} })
 })
 
-function startCall(username) {
-  console.log(username)
-  // call openConnection(hostPeerID) function if isHost is true
-  // call joinConnection(hostPeerID) function if isHost is false
+async function startCall(username) {
+  console.log('start call', username)
+
+  const peerid = isHost.value ? hostPeerID.value : generateRandomHash()
+  await init(peerid)
+
+  if (!isHost.value) {
+    joinConnection(hostPeerID.value)
+  }
+
 }
+
+function openConnection(peerID) {
+  // do nothing
+}
+
+function joinConnection(peerID) {
+  connect(peerID)
+}
+
 
 function onToggleVideo() {
   // toggle video
