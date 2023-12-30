@@ -1,9 +1,24 @@
 <script setup>
-import { onMounted, onUnmounted, ref, reactive, watch, watchEffect } from 'vue';
-import { useRoute } from 'vue-router';
-
+import { ref, onBeforeMount } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
+const router = useRouter();
+
+const isHost = ref(route.query.host === 'true')
+const hostPeerID = ref(route.params.id)
+const usernameInput = ref('')
+
+onBeforeMount(() => {
+  // remove query 
+  router.replace({ query: {} })
+})
+
+function startCall(username) {
+  console.log(username)
+  // call openConnection(hostPeerID) function if isHost is true
+  // call joinConnection(hostPeerID) function if isHost is false
+}
 
 /**
 # FLOW
@@ -30,12 +45,27 @@ where lksadkjh is the peer id of the room host
 
 <template>
   <div>
-    Host ID: {{ route.params.id }}
+    <!-- Informations -->
+    <div>
+      Host ID: {{ hostPeerID }}
+      <br>
+      Is Host: {{ isHost }}
+    </div>
+
+    <br>
     <!-- Pre Call -->
     <div>
       Pre Call
+      <div>
+        <div>
+          <label for="name">Username:</label>
+          <input type="text" id="name" name="name" placeholder="Enter with a username" v-model="usernameInput" maxlength="20">
+        </div>
+        <button @click="startCall(usernameInput)">Start Call</button>
+      </div>
     </div>
 
+    <br>
     <!-- Call -->
     <div>
       Call

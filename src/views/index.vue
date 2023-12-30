@@ -16,15 +16,18 @@ function updateRoomKey() {
     roomKey.value = generateRandomHash()
 }
 
-function joinRoom(roomKey) {
-    if (roomKey) {
-        router.push(`/join/${roomKey}`)
-    }
+async function joinRoom(roomKey, isHost = false) {
+    if (!roomKey && roomKey.length !== 8) return
+    await router.push(`/join/${roomKey}` + (isHost ? '?host=true' : ''))
 }
 
-function copyRoomKeyToClipboard() {
-    navigator.clipboard.writeText(roomKey.value)
-    // TODO: show notification
+async function copyRoomKeyToClipboard() {
+    try {
+        await navigator.clipboard.writeText(roomKey.value)
+        // TODO: show notification
+    } catch (error) {
+        console.error(error)
+    }
 }    
 
 </script>
@@ -33,13 +36,14 @@ function copyRoomKeyToClipboard() {
     <div>
         <h1>Home</h1>
         <div>
-            <div type="text"> 
-                {{ roomKey  }}
-                <button @click="copyRoomKeyToClipboard">Copy Room Key</button>
+            <div> 
+                <input type="text" v-model="roomKey" minlength="8" maxlength="8" placeholder="Enter Room Key" />
+                <button @click="copyRoomKeyToClipboard()">Copy</button>
             </div>
             <br>
-            <button @click="joinRoom(roomKey)">Join</button> 
-            <button @click="updateRoomKey">Generate New Room Key</button>
+            <button @click="updateRoomKey()">Generate New Room Key</button>
+            <button @click="joinRoom(roomKey)">Join Room</button>
+            <button @click="joinRoom(roomKey, true)">Create Room</button>
         </div>
     </div>
 </template>
