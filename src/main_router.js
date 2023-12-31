@@ -6,7 +6,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 const routes = [
   { path: '/', component: () => import('./views/index.vue'), name: 'index' },
   { path: '/join/:id', component: () => import('./views/_id.vue'), name: 'join' },
-   { path: '/:pathMatch(.*)*', component: () => import('./views/404.vue'), name: '404' },
+  { path: '/:pathMatch(.*)*', component: () => import('./views/404.vue'), name: '404' },
+  { path: '/test', component: () => import('./views/test.vue'), name: 'test' },
 ]
 
 // 3. Create the router instance and pass the `routes` option

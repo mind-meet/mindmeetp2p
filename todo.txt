@@ -51,6 +51,7 @@ Vai aparecer quando o usuario entrar na sala assim que criar ela.
 "Voce deseja aceitar XXXX entrar na sala?" (Mostar em forma de Modal no centro superior da tela)
 "Ops, aconteceu um erro, tente novamente mais tarde" (Mostrar em forma de Toast Message)
 "Link da sala copiado com sucesso" (Mostrar em forma de Toast Message)
+"This app requires Camera/Microphone permission. Refresh the page and provide access."
 
 ----------GERAR QR CODE-----------------------------------------------------------------------------------
 
@@ -68,4 +69,9 @@ function genQRCode() {
 
   qrcode.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${input.value}`;
 }
-"This app requires Camera/Microphone permission. Refresh the page and provide access."
+
+-----------
+- Detalhes Legais
+1. Contador de tempo no nome da sala quando o usuario estiver em outra ABA do navegador
+2. Animacoes de entrada e saida
+3. Sons
