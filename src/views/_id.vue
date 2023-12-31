@@ -4,12 +4,14 @@ import Medias from '../components/Medias.vue'
 import { ref, onBeforeMount, inject } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
+import useMediaControll from '../composables/useMediaControll';
 import { generateRandomHash } from '../lib/hash-generator'
 import { P2PSymbol } from '../lib/webrtc'
 
 const route = useRoute();
 const router = useRouter();
 const toast = useToast();
+const { isAudioOn, isVideoOn, setVideoOn, setAudioOn } = useMediaControll()
 
 const PC = inject(P2PSymbol)
 
@@ -37,6 +39,23 @@ onBeforeMount(async () => {
 
 })
 
+function handleClickMicrophone() {
+    const prevState = isAudioOn.value
+    setAudioOn(!isAudioOn.value)
+    PC.muteAudio(prevState)
+}
+
+function handleClickCamera() {
+    const prevState = isVideoOn.value
+    setVideoOn(!isVideoOn.value)
+    PC.pauseVideo(prevState)
+}
+
+function handleClickClose() {
+    PC.close()
+    router.push('/')
+}
+
 /**
 # FLOW
 
@@ -63,8 +82,16 @@ where lksadkjh is the peer id of the room host
 <template>
     <Medias /> 
     <footer>
-      <button @click="handleClickMicrophone">Microphone</button>
-      <button @click="handleClickCamera">Camera</button>
+      <button @click="handleClickMicrophone">
+        {{ 
+          isAudioOn ? 'Mute Microphone' : 'Unmute Microphone' 
+        }} 
+      </button>
+      <button @click="handleClickCamera">
+        {{ 
+          isVideoOn ? 'Pause Camera' : 'Unpause Camera' 
+        }}
+      </button>
       <button @click="handleClickClose">Close</button>
     </footer>
 </template>

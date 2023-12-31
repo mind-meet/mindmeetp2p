@@ -1,6 +1,6 @@
 import Peer from "peerjs"
 
-const DEBUG_LEVEL = 3;
+const DEBUG_LEVEL = 0;
  
 class EventEmitter {
   constructor() {
@@ -164,6 +164,25 @@ export default class P2P extends EventEmitter {
         const success = await this.createPeer(pid);
         if(!success) {
             throw new Error('Failed to create peer');
+        }
+    }
+
+    close = () => {
+        if(this.peerConnection) {
+            this.peerConnection.destroy();
+            this.peerConnection = null;
+            this.dataChannel = null;
+            this.mediaConnection = null;
+
+            // stop local stream
+            this.localStream.getTracks().forEach((track) => {
+                track.stop();
+            });
+
+            this.localStream = null;
+            this.remoteStream = null;
+
+            this.dispatchEvent('peer-closed');
         }
     }
 
