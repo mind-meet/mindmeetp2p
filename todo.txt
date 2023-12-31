@@ -68,3 +68,4 @@ function genQRCode() {
 
   qrcode.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${input.value}`;
 }
+"This app requires Camera/Microphone permission. Refresh the page and provide access."

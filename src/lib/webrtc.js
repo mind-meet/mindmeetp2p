@@ -1,186 +1,197 @@
-import Peer from 'peerjs';
+import Peer from "peerjs"
 
-let localPeer = null;
-let dataChannel = null;
-let peerCall = null;
+const DEBUG_LEVEL = 3;
+ 
+class EventEmitter {
+  constructor() {
+    this.events = {};
+  };
 
-let localPeerIsOpen = false;
+  dispatchEvent = (e, data) => {
+    if (!this.events[e]) return;
+    this.events[e].forEach(callback => callback(data));
+  };
 
-let localStream = null;
-let remoteStream = null;
+  addEventListener = (event, callback) => {
+    if (!this.events[event]) this.events[event] = [];
+    this.events[event].push(callback);
+  };
 
-const init = (id) => {
-    localPeer = null;
-    localPeerIsOpen = false;
+  removeEventListener = (event) => {
+    if (!this.events[event]) return;
+    delete this.events[event];
+  };
+};
 
-    localPeer = new Peer(id);
 
-    // TODO : MAKE A BEATIFUL PROMISSE WITH RESOLVE AND REJECT
-    return new Promise((resolve, reject) => {
-        localPeer.on('open', () => {
-            console.log('peer open');
-            localPeerIsOpen = true;
-            resolve();
+export default class P2P extends EventEmitter {
+    constructor() {
+        super();
+        this.localStream = null;
+        this.remoteStream = null;
+        this.peerConnection = null;
+        this.dataChannel = null;
+        this.mediaConnection = null;
+        this.configuration = {
+            iceServers: [
+                {
+                    urls: [
+                        'stun:stun3.l.google.com:19302',
+                        'stun:stun4.l.google.com:19302'
+                    ]
+                }
+            ],
+            iceCandidatePoolSize: 10
+        };
+    };
+
+    createPeer = async (pid) => {
+        this.peerConnection = new Peer(pid, options={
+            config: this.configuration,
+            debug: DEBUG_LEVEL
+        });
+        this.remoteStream = new MediaStream();
+
+        this.openReceiveDataChannel();
+        this.openReiceveMediaChannel();
+
+        this.peerConnection.on('open', () => {
+            console.log('peer opened');
+            this.dispatchEvent('peer-opened', pid);
         });
 
-        localPeer.on('connection', (conn) => {
-            console.log('peer connection');
-            dataChannel = conn;
+        this.peerConnection.on('error', (err) => {
+            console.log(err);
+        });
 
-            dataChannel.on('open', () => {
-                console.log('data channel open');
+        this.peerConnection.on('close', () => {
+            this.dispatchEvent('peer-closed');
+            this.peerConnection.destroy();
+            this.peerConnection = null;
+        });
 
-                dataChannel.on('data', (data) => {
-                    console.log('data channel data', data);
-                });
 
-                // REMOVE THIS
-                sendToChannel('hello');
+        try { 
+            this.localStream = await navigator.mediaDevices.getUserMedia(
+                { 
+                audio: true,
+                video: true
+                }
+            );
+
+            this.localStream.getTracks().forEach((track) => {
+                this.peerConnection.addTrack(track, this.localStream);
             });
+      
+            this.dispatchEvent('local-stream-available');
+
+            this.peerConnection.ontrack = (e) => {
+                e.streams[0].getTracks().forEach((track) => {
+                this.remoteStream.addTrack(track, this.remoteStream);
+                });
+                this.dispatchEvent('remote-stream-available');
+            };
+            return true;
+        } catch(err) {
+            console.log(err);
+            return false;
+        };
+    }
+
+    // TODO: Refactor to use only one method for call and answer
+    call = (pid) => {
+        this.mediaConnection = this.peerConnection.call(pid, this.localStream);
+        this.dataChannel = this.peerConnection.connect(pid);
+
+        this.mediaConnection.on('stream', (stream) => {
+            this.remoteStream = stream;
+            console.log('remote stream received');
+            this.dispatchEvent('remote-stream-received');
         });
 
-        localPeer.on('error', (err) => {
-            console.log('peer error', err);
-            reject(err);
+        this.mediaConnection.on('close', () => {
+            this.dispatchEvent('media-connection-closed');
+        });
+
+        this.mediaConnection.on('error', (err) => {
+            console.log(err);
+        });
+
+        this.dataChannel.on('open', () => {
+            this.dispatchEvent('data-channel-opened');
+        });
+
+        this.dataChannel.on('data', (data) => {
+            const msg = {data: data, time: new Date().toLocaleTimeString(), type: 'received'};
+            this.messages.push(msg);
+            console.log("data received: ", data);
+            this.dispatchEvent('data-received', msg);
+        });
+
+        this.dataChannel.on('close', () => {
+            this.dispatchEvent('data-channel-closed');
         })
 
-        localPeer.on('call', async (call) => {
-            console.log('peer call');
-            peerCall = call;
-            
-            console.log('peer call answer');
-            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-
-            call.answer(localStream);
-            call.on('stream', (stream) => {
-                console.log('peer call stream');
-                remoteStream = stream;
-            });
-        });
-    })
-}
-
-async function connect(id){
-    if (!localPeerIsOpen) return false;
-
-    const conn = localPeer.connect(id);
-    dataChannel = conn;
-
-    // TODO : MAKE A BEATIFUL PROMISSE WITH RESOLVE AND REJECT
-    return new Promise((resolve, reject) => {
-        dataChannel.on('open', () => {
-            console.log('data channel open');
-
-            dataChannel.on('data', (data) => {
-                console.log('data channel data', data);
-            });
-        
-            // REMOVE THIS
-            sendToChannel('hello');
-
-            resolve();
-        });
-
-        dataChannel.on('error', (err) => {
-            console.log('data channel error', err);
-            reject(err);
+        this.dataChannel.on('error', (err) => {
+            console.log(err);
         });
     }
-)}   
+        
 
-const call = async (id) => {
-    if (!localStream || typeof localStream === 'undefined') return false;
+    openReceiveDataChannel = () => {
+        this.peerConnection.on('connection', (conn) => {
+            console.log('data channel opened');
+            this.dataChannel = conn;
+            this.dispatchEvent('connection-opened');
 
-    const call = localPeer.call(id, localStream);
-    peerCall = call;
+            this.dataChannel.on('open', () => {
+                this.dispatchEvent('data-channel-opened');
+            });
 
-    // TODO : MAKE A BEATIFUL PROMISSE WITH RESOLVE AND REJECT
-    return new Promise((resolve, reject) => {
-        peerCall.on('stream', (stream) => {
-            console.log('peer call stream');
-            remoteStream = stream;
-            resolve();
+            this.dataChannel.on('data', (data) => {
+                const msg = {data: data, time: new Date().toLocaleTimeString(), type: 'received'};
+                this.messages.push(msg);
+                console.log("data received: ", data);
+                this.dispatchEvent('data-received', msg);
+            });
+        })
+    }
+
+    openReiceveMediaChannel = () => {
+        this.peerConnection.on('call', (call) => {
+            this.mediaConnection = call;
+            console.log('answer call');
+            this.mediaConnection.answer(this.localStream);
+            this.mediaConnection.on('stream', (stream) => {
+                this.remoteStream = stream;
+                console.log('remote stream received');
+                this.dispatchEvent('remote-stream-received');
+            });
         });
+    }
 
-        peerCall.on('error', (err) => {
-            console.log('peer call error', err);
-            reject(err);
-        });
-    })
-}
-
-function sendToChannel(data) {
-    if(!dataChannel) return
-    dataChannel.send(data); 
-}
-
-const getLocalStream = () => {
-    return localStream;
-}
-
-const setLocalStream = (stream) => {
-    localStream = stream;
-}
-
-function muteLocalAudioTracks(mute=true) {
-    localStream.getAudioTracks().forEach((track) => {
-        track.enabled = !mute;
-    });
-}
-
-function closeStreamTrack(stream, type) {
-    stream.getTracks().forEach((track) => {
-        if(track.kind === type) {
-            track.stop();
+    init = async (_pid) => {
+        const success = await this.createPeer(_pid);
+        if(!success) {
+            throw new Error('Failed to create peer');
         }
-    });
-}
+    }
 
-function closeStream(stream){
-    stream.getTracks().forEach((track) => {
-        track.stop();
-    });
-}
+    muteAudio = (mute) => {
+        this.localStream.getAudioTracks().forEach((track) => {
+            track.enabled = !mute;
+        });
+    }
 
-function addVideoTrack(stream) {
-    closeStreamTrack(localStream, 'video');
-    localStream.addTrack(stream.getVideoTracks()[0]);
-}
+    pauseVideo = (pause) => {
+        this.localStream.getVideoTracks().forEach((track) => {
+            track.enabled = !pause;
+        });
+    }
 
-function addAudioTrack(stream) {
-    closeStreamTrack(localStream, 'audio');
-    localStream.addTrack(stream.getAudioTracks()[0]);
-}
-
-function closeLocalStream(){
-    closeStream(localStream);
-}
-
-function closeRemoteStream(){
-    closeStream(remoteStream);
-}
-
-
-const getRemoteStream = () => {
-    return remoteStream;
-}
-
-const getDataChannel = () => {
-    return dataChannel;
-}
-
-export {
-    init,
-    connect,
-    call,
-    getLocalStream,
-    setLocalStream,
-    getRemoteStream,
-    getDataChannel,
-    muteLocalAudioTracks,
-    closeStreamTrack,
-    closeLocalStream,
-    closeRemoteStream,
-    addVideoTrack,
-    addAudioTrack
+    send = (payload) => {
+        if(this.dataChannel) {
+            this.dataChannel.send(JSON.stringify(payload));
+        }
+    }
 }
