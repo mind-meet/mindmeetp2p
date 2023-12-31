@@ -1,5 +1,7 @@
 import Peer from "peerjs"
 
+import { getMicrophoneVolumeIndicator } from "./speak-detection";
+
 const DEBUG_LEVEL = 0;
  
 class EventEmitter {
@@ -79,6 +81,10 @@ export default class P2P extends EventEmitter {
                 video: true
                 }
             );
+            
+            // TODO: handle errors
+            getMicrophoneVolumeIndicator(this.localStream);
+
             console.log('local stream available');
             this.dispatchEvent('local-stream-received');
             return true;
@@ -86,6 +92,7 @@ export default class P2P extends EventEmitter {
             console.log(err);
             return false;
         };
+
     }
 
     // TODO: Refactor to use only one method for call and answer
