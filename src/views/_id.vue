@@ -1,61 +1,41 @@
 <script setup>
-import { ref, onBeforeMount } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import Medias from '../components/Medias.vue'
 
-import { init, connect, call, setLocalStream, get } from '../lib/webrtc'
+import { ref, onBeforeMount, inject } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useToast } from 'vue-toastification';
 import { generateRandomHash } from '../lib/hash-generator'
+import { P2PSymbol } from '../lib/webrtc'
 
 const route = useRoute();
 const router = useRouter();
+const toast = useToast();
+
+const PC = inject(P2PSymbol)
 
 const isHost = ref(route.query.host === 'true')
 const hostPeerID = ref(route.params.id)
-const usernameInput = ref('')
 
-onBeforeMount(() => {
-  // remove query 
+onBeforeMount(async () => {
+  // TODO: remove this later
   router.replace({ query: {} })
-})
 
-async function startCall(username) {
-  console.log('start call', username)
+  try {
+    const pid = isHost.value ? hostPeerID.value : generateRandomHash()
 
-  const peerid = isHost.value ? hostPeerID.value : generateRandomHash()
-  await init(peerid)
+    await PC.init(pid)
 
-  if (!isHost.value) {
-    await joinConnection(hostPeerID.value)
+    // TODO: handle errors here (if host is not available)
+    if(!isHost.value) {
+        console.log('calling host', hostPeerID.value)
+        await PC.call(hostPeerID.value)
+    }
 
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true
-    })
-
-    setLocalStream(stream)
-
-    await call(hostPeerID.value)
+  } catch (error) {
+    toast.error(error.message)
   }
 
-}
-
-function openConnection(peerID) {
-  // do nothing
-}
-
-async function joinConnection(peerID) {
-  await connect(peerID)
-}
-
-async function onToggleVideo() {
-}
-
-function onToggleAudio() {
-  // toggle audio
-}
-
-function onEndCall() {
-  // end call
-}
+})
 
 /**
 # FLOW
@@ -81,53 +61,12 @@ where lksadkjh is the peer id of the room host
 </script>
 
 <template>
-  <div>
-    <!-- Informations -->
-    <div>
-      Host ID: {{ hostPeerID }}
-      <br>
-      Is Host: {{ isHost }}
-    </div>
-
-    <br>
-    <!-- Pre Call -->
-    <div>
-      Pre Call
-      <div>
-        <div>
-          <label for="name">Username:</label>
-          <input type="text" id="name" name="name" placeholder="Enter with a username" v-model="usernameInput" maxlength="20">
-        </div>
-        <button @click="startCall(usernameInput)">Start Call</button>
-      </div>
-    </div>
-
-    <br>
-    <!-- Call -->
-    <div>
-      <div>
-        <div>
-          Local
-          <video id="localStream" autoplay playsinline muted></video>
-        </div>
-        <div>
-          Remote
-          <video id="remoteStream" autoplay playsinline></video>
-        </div>
-      </div>
-      <footer>
-        <button
-          @click="onToggleVideo()"
-        >Toggle Video</button>
-        <button
-          @click="onToggleAudio()"
-        >Toggle Audio</button>
-        <button
-          @click="onEndCall()"
-        >End Call</button>
-      </footer>
-    </div>
-  </div> 
+    <Medias /> 
+    <footer>
+      <button @click="handleClickMicrophone">Microphone</button>
+      <button @click="handleClickCamera">Camera</button>
+      <button @click="handleClickClose">Close</button>
+    </footer>
 </template>
 
 <style scoped>

@@ -23,6 +23,7 @@ class EventEmitter {
   };
 };
 
+export const P2PSymbol = Symbol('P2P');
 
 export default class P2P extends EventEmitter {
     constructor() {
@@ -46,9 +47,9 @@ export default class P2P extends EventEmitter {
     };
 
     createPeer = async (pid) => {
-        this.peerConnection = new Peer(pid, options={
-            config: this.configuration,
-            debug: DEBUG_LEVEL
+        this.peerConnection = new Peer(pid, {
+            debug: DEBUG_LEVEL,
+            config: this.configuration
         });
         this.remoteStream = new MediaStream();
 
@@ -78,19 +79,8 @@ export default class P2P extends EventEmitter {
                 video: true
                 }
             );
-
-            this.localStream.getTracks().forEach((track) => {
-                this.peerConnection.addTrack(track, this.localStream);
-            });
-      
-            this.dispatchEvent('local-stream-available');
-
-            this.peerConnection.ontrack = (e) => {
-                e.streams[0].getTracks().forEach((track) => {
-                this.remoteStream.addTrack(track, this.remoteStream);
-                });
-                this.dispatchEvent('remote-stream-available');
-            };
+            console.log('local stream available');
+            this.dispatchEvent('local-stream-received');
             return true;
         } catch(err) {
             console.log(err);
@@ -170,8 +160,8 @@ export default class P2P extends EventEmitter {
         });
     }
 
-    init = async (_pid) => {
-        const success = await this.createPeer(_pid);
+    init = async (pid) => {
+        const success = await this.createPeer(pid);
         if(!success) {
             throw new Error('Failed to create peer');
         }
