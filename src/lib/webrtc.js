@@ -1,8 +1,11 @@
-import Peer from "peerjs"
+import Peer from "peerjs";
 
-import { getMicrophoneVolumeIndicator, stopMicrophoneProcessing } from "./speak-detection";
+// import { getMicrophoneVolumeIndicator, stopMicrophoneProcessing } from "./speak-detection";
+// import { MicVAD } from "@ricky0123/vad-web";
 
 const DEBUG_LEVEL = 0;
+
+let myvad = null
  
 class EventEmitter {
   constructor() {
@@ -81,14 +84,25 @@ export default class P2P extends EventEmitter {
                 video: true
                 }
             );
-            
-            // TODO: handle errors
-            getMicrophoneVolumeIndicator(this.localStream, (volume_data) => {
-                this.dispatchEvent('volume-change', volume_data)
-            })
 
             console.log('local stream available');
             this.dispatchEvent('local-stream-received');
+                
+            // TODO: handle errors starting vad
+            // TODO: dispatch only one event for vad speech-detect(status)
+            // this work but is slow
+            myvad = await vad.MicVAD.new({
+                onSpeechStart: () => {
+                    this.dispatchEvent('speech-start')
+                },
+
+                onSpeechEnd: (audio) => {
+                    this.dispatchEvent('speech-end')
+                }
+            })
+
+            myvad.start()
+            
             return true;
         } catch(err) {
             console.log(err);
@@ -183,7 +197,8 @@ export default class P2P extends EventEmitter {
             this.dataChannel = null;
             this.mediaConnection = null;
 
-            stopMicrophoneProcessing()
+            // stopMicrophoneProcessing()
+            if (myvad) myvad.pause()
 
             // stop local stream
             this.localStream.getTracks().forEach((track) => {

@@ -60,16 +60,18 @@ function handleClickClose() {
     router.push('/')
 }
 
-function handleVolumeChange(volume_data){
-  audioVolume.value = volume_data.final_volume
-  isSpeaking.value = !isSpeaking.value && volume_data.type == "change"
+function handleSpeechStartEnd(){
+  isSpeaking.value = !isSpeaking.value
 }
 
-PC.addEventListener("volume-change", handleVolumeChange)
+PC.addEventListener("speech-start", handleSpeechStartEnd)
+PC.addEventListener("speech-end", handleSpeechStartEnd)
 
-onBeforeUnmount(() => 
-  PC.removeEventListener("volume-change")
-)
+onBeforeUnmount(() => {
+  PC.removeEventListener("speech-start")
+  PC.removeEventListener("speech-end")
+});
+
 /**
 # FLOW
 
@@ -94,7 +96,8 @@ where lksadkjh is the peer id of the room host
 </script>
 
 <template>
-    {{ isSpeaking }} {{ audioVolume }}
+  <!-- Volume status change if green = speaking -->
+    {{ isSpeaking }}
     <Medias /> 
     <footer>
       <Button @click="handleClickMicrophone">
