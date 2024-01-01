@@ -18,7 +18,7 @@ function hasAudioTrack(stream) {
  * Start to handle microphone volume indicator
  * @param {MediaStream} stream Media stream audio
  */
-export async function getMicrophoneVolumeIndicator(stream) {
+export async function getMicrophoneVolumeIndicator(stream, onVolumeChange) {
     if (isAudioContextSupported() && hasAudioTrack(stream)) {
         stopMicrophoneProcessing();
         console.log('Start microphone volume indicator for audio track', stream.getAudioTracks()[0]);
@@ -34,18 +34,9 @@ export async function getMicrophoneVolumeIndicator(stream) {
             const rms = Math.sqrt(sum / inputBuffer.length);
             const volume = Math.max(0, Math.min(1, rms * 10));
             const finalVolume = Math.round(volume * 100);
-            console.log('Volume indicator', finalVolume);
 
-            /*   if (myAudioStatus && finalVolume > 10) {
-                const config = {
-                    type: 'micVolume',
-                    peer_id: myPeerId,
-                    volume: finalVolume,
-                };
-                handleMyVolume(config);
-                sendToDataChannel(config);
-            }
-            updateVolumeIndicator(volume); */
+            const type = finalVolume > 10 ? "change" : "stop"
+            onVolumeChange({type, volume, final_volume: finalVolume})
         };
 
         microphone.connect(scriptProcessor);
@@ -59,20 +50,8 @@ export async function getMicrophoneVolumeIndicator(stream) {
  * Stop microphone processing
  */
 export function stopMicrophoneProcessing() {
-    console.log('Stop microphone volume indicator');
     if (scriptProcessor) {
         scriptProcessor.disconnect();
         scriptProcessor = null;
     }
-}
-
-/**
- * Update volume indicator
- * @param {number} volume
- */
-function updateVolumeIndicator(volume) {
-    const activeBars = Math.ceil(volume * bars.length);
-    bars.forEach((bar, index) => {
-        bar.classList.toggle('active', index < activeBars);
-    });
 }

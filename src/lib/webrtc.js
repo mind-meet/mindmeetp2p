@@ -1,6 +1,6 @@
 import Peer from "peerjs"
 
-import { getMicrophoneVolumeIndicator } from "./speak-detection";
+import { getMicrophoneVolumeIndicator, stopMicrophoneProcessing } from "./speak-detection";
 
 const DEBUG_LEVEL = 0;
  
@@ -83,7 +83,9 @@ export default class P2P extends EventEmitter {
             );
             
             // TODO: handle errors
-            getMicrophoneVolumeIndicator(this.localStream);
+            getMicrophoneVolumeIndicator(this.localStream, (volume_data) => {
+                this.dispatchEvent('volume-change', volume_data)
+            })
 
             console.log('local stream available');
             this.dispatchEvent('local-stream-received');
@@ -180,6 +182,8 @@ export default class P2P extends EventEmitter {
             this.peerConnection = null;
             this.dataChannel = null;
             this.mediaConnection = null;
+
+            stopMicrophoneProcessing()
 
             // stop local stream
             this.localStream.getTracks().forEach((track) => {

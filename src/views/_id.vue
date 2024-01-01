@@ -3,7 +3,7 @@ import  { Button } from '../components/ui/button'
 
 import Medias from '../components/Medias.vue'
 
-import { ref, onBeforeMount, inject } from 'vue';
+import { ref, onBeforeMount, onMounted, inject, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
 import useMediaControll from '../composables/useMediaControll';
@@ -19,6 +19,9 @@ const PC = inject(P2PSymbol)
 
 const isHost = ref(route.query.host === 'true')
 const hostPeerID = ref(route.params.id)
+
+const audioVolume = ref(0)
+const isSpeaking = ref(false)
 
 onBeforeMount(async () => {
   // TODO: remove this later
@@ -38,7 +41,6 @@ onBeforeMount(async () => {
   } catch (error) {
     toast.error(error.message)
   }
-
 })
 
 function handleClickMicrophone() {
@@ -58,6 +60,16 @@ function handleClickClose() {
     router.push('/')
 }
 
+function handleVolumeChange(volume_data){
+  audioVolume.value = volume_data.final_volume
+  isSpeaking.value = !isSpeaking.value && volume_data.type == "change"
+}
+
+PC.addEventListener("volume-change", handleVolumeChange)
+
+onBeforeUnmount(() => 
+  PC.removeEventListener("volume-change")
+)
 /**
 # FLOW
 
@@ -82,6 +94,7 @@ where lksadkjh is the peer id of the room host
 </script>
 
 <template>
+    {{ isSpeaking }} {{ audioVolume }}
     <Medias /> 
     <footer>
       <Button @click="handleClickMicrophone">
