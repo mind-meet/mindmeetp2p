@@ -4,7 +4,7 @@ import App from './App.vue'
 import Toast from "vue-toastification";
 
 // Import the CSS or use your own!
-import './style.css'
+// import './style.css'
 import './assets/tailwind.css'
 import "vue-toastification/dist/index.css";
 

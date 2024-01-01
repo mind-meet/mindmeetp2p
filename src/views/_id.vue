@@ -1,4 +1,6 @@
 <script setup>
+import  { Button } from '../components/ui/button'
+
 import Medias from '../components/Medias.vue'
 
 import { ref, onBeforeMount, inject } from 'vue';
@@ -82,17 +84,17 @@ where lksadkjh is the peer id of the room host
 <template>
     <Medias /> 
     <footer>
-      <button @click="handleClickMicrophone">
+      <Button @click="handleClickMicrophone">
         {{ 
           isAudioOn ? 'Mute Microphone' : 'Unmute Microphone' 
         }} 
-      </button>
-      <button @click="handleClickCamera">
+      </Button>
+      <Button @click="handleClickCamera">
         {{ 
           isVideoOn ? 'Pause Camera' : 'Unpause Camera' 
         }}
-      </button>
-      <button @click="handleClickClose">Close</button>
+      </Button>
+      <Button @click="handleClickClose">Close</Button>
     </footer>
 </template>
 
