@@ -21,6 +21,22 @@ function handleLocalStreamAvailable() {
     setVideoOn(true)
 }
 
+function onLoadedMetadata() {
+    console.log('onLoadedMetadata')
+}
+
+function onCanPlay() {
+    console.log('onCanPlay')
+}
+
+function onCanPlayThrough() {
+    console.log('onCanPlayThrough')
+}
+
+function onWaiting() {
+    console.log('onWaiting')
+}
+
 PC.addEventListener('remote-stream-received', handleRemoteStreamAvailable)
 PC.addEventListener('local-stream-received', handleLocalStreamAvailable)
 
@@ -35,7 +51,15 @@ onBeforeUnmount(() => {
     Medias
     <div>
         Local - Audio : {{ isAudioOn ? 'On' : 'Off' }} - Video : {{ isVideoOn ? 'On' : 'Off' }}
-        <video autoplay muted playsinline ref="localVideo"></video>
+        <video 
+            ref="localVideo"
+            autoplay 
+            muted 
+            playsinline 
+            @loadedmetadata="onLoadedMetadata"
+            @canplay="onCanPlay"
+            @canplaythrough="onCanPlayThrough"
+        ></video>
         Remote
         <video autoplay playsinline ref="remoteVideo"></video>
     </div>

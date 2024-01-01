@@ -20,11 +20,13 @@ const PC = inject(P2PSymbol)
 const isHost = ref(route.query.host === 'true')
 const hostPeerID = ref(route.params.id)
 
-const audioVolume = ref(0)
 const isSpeaking = ref(false)
 
+// TODO: handle call status
+// waiting, connecting, connected, failed, closed
+const callStatus = ref('') 
+
 onBeforeMount(async () => {
-  // TODO: remove this later
   router.replace({ query: {} })
 
   try {
@@ -62,6 +64,7 @@ function handleClickClose() {
 
 function handleSpeechStartEnd(){
   isSpeaking.value = !isSpeaking.value
+  if(PC.connected) PC.send({ type: 'speech', payload: isSpeaking.value })
 }
 
 PC.addEventListener("speech-start", handleSpeechStartEnd)

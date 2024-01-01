@@ -49,6 +49,7 @@ export default class P2P extends EventEmitter {
             ],
             iceCandidatePoolSize: 10
         };
+        this.connected = false;
     };
 
     createPeer = async (pid) => {
@@ -131,6 +132,7 @@ export default class P2P extends EventEmitter {
         });
 
         this.dataChannel.on('open', () => {
+            this.connected = true;
             this.dispatchEvent('data-channel-opened');
         });
 
@@ -158,6 +160,7 @@ export default class P2P extends EventEmitter {
             this.dispatchEvent('connection-opened');
 
             this.dataChannel.on('open', () => {
+                this.connected = true;
                 this.dispatchEvent('data-channel-opened');
             });
 
@@ -173,7 +176,7 @@ export default class P2P extends EventEmitter {
     openReiceveMediaChannel = () => {
         this.peerConnection.on('call', (call) => {
             this.mediaConnection = call;
-            console.log('answer call');
+            this.dispatchEvent('call-received');
             this.mediaConnection.answer(this.localStream);
             this.mediaConnection.on('stream', (stream) => {
                 this.remoteStream = stream;
@@ -207,6 +210,8 @@ export default class P2P extends EventEmitter {
 
             this.localStream = null;
             this.remoteStream = null;
+
+            this.connected = false;
 
             this.dispatchEvent('peer-closed');
         }
