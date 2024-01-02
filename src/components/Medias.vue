@@ -1,4 +1,6 @@
 <script setup>
+import Media from './Media.vue';
+
 import { inject, ref, onBeforeUnmount } from 'vue';
 import { P2PSymbol } from '../lib/webrtc'
 
@@ -6,36 +8,20 @@ import useMediaControll from '../composables/useMediaControll'
 
 const PC = inject(P2PSymbol)
 
-const { isAudioOn, isVideoOn, setVideoOn, setAudioOn } = useMediaControll()
+const { setVideoOn, setAudioOn } = useMediaControll()
 
-const remoteVideo = ref(null)
-const localVideo = ref(null)
-
+const remoteStream = ref(null)
 function handleRemoteStreamAvailable() {
-    remoteVideo.value.srcObject = PC.remoteStream
+    remoteStream.value = PC.remoteStream
 }
 
+const localStream = ref(null)
 function handleLocalStreamAvailable() {
-    localVideo.value.srcObject = PC.localStream
+    localStream.value = PC.localStream
     setAudioOn(true)
     setVideoOn(true)
 }
 
-function onLoadedMetadata() {
-    console.log('onLoadedMetadata')
-}
-
-function onCanPlay() {
-    console.log('onCanPlay')
-}
-
-function onCanPlayThrough() {
-    console.log('onCanPlayThrough')
-}
-
-function onWaiting() {
-    console.log('onWaiting')
-}
 
 PC.addEventListener('remote-stream-received', handleRemoteStreamAvailable)
 PC.addEventListener('local-stream-received', handleLocalStreamAvailable)
@@ -50,18 +36,8 @@ onBeforeUnmount(() => {
 <template>
     Medias
     <div>
-        Local - Audio : {{ isAudioOn ? 'On' : 'Off' }} - Video : {{ isVideoOn ? 'On' : 'Off' }}
-        <video 
-            ref="localVideo"
-            autoplay 
-            muted 
-            playsinline 
-            @loadedmetadata="onLoadedMetadata"
-            @canplay="onCanPlay"
-            @canplaythrough="onCanPlayThrough"
-        ></video>
-        Remote
-        <video autoplay playsinline ref="remoteVideo"></video>
+        Local <Media :stream="localStream" />
+        Remote <Media :stream="remoteStream" />
     </div>
 </template>
 
