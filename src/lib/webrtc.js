@@ -140,9 +140,7 @@ export default class P2P extends EventEmitter {
         });
 
         this.dataChannel.on('data', (data) => {
-            const msg = {data: data, time: new Date().toLocaleTimeString(), type: 'received'};
-            this.messages.push(msg);
-            console.log("data received: ", data);
+            const msg = {data: JSON.parse(data), time: new Date().toLocaleTimeString(), type: 'received'};
             this.dispatchEvent('data-received', msg);
         });
 
@@ -168,9 +166,7 @@ export default class P2P extends EventEmitter {
             });
 
             this.dataChannel.on('data', (data) => {
-                const msg = {data: data, time: new Date().toLocaleTimeString(), type: 'received'};
-                this.messages.push(msg);
-                console.log("data received: ", data);
+                const msg = {data: JSON.parse(data), time: new Date().toLocaleTimeString(), type: 'received'};
                 this.dispatchEvent('data-received', msg);
             });
         })

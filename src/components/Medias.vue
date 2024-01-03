@@ -4,11 +4,14 @@ import Media from './Media.vue';
 import { inject, ref, onBeforeUnmount } from 'vue';
 import { P2PSymbol } from '../lib/webrtc'
 
+
+
 import useMediaControll from '../composables/useMediaControll'
 
 const PC = inject(P2PSymbol)
 
 const isSpeaking = ref(false)
+const isRemoteSpeaking = ref(false)
 
 const { setVideoOn, setAudioOn } = useMediaControll()
 
@@ -35,11 +38,16 @@ PC.addEventListener("speech-end", handleSpeechStartEnd)
 PC.addEventListener('remote-stream-received', handleRemoteStreamAvailable)
 PC.addEventListener('local-stream-received', handleLocalStreamAvailable)
 
+PC.addEventListener('data-received', (msg) => {
+    if(msg.data.type === 'speech') isRemoteSpeaking.value = msg.data.payload
+})
+
 onBeforeUnmount(() => {
     PC.removeEventListener('remote-stream-received', handleRemoteStreamAvailable)
     PC.removeEventListener('local-stream-received', handleLocalStreamAvailable)
     PC.removeEventListener("speech-start")
     PC.removeEventListener("speech-end")
+    PC.removeEventListener('data-received')
 })
 
 </script>
@@ -59,8 +67,8 @@ onBeforeUnmount(() => {
             <Media :stream="remoteStream" />
             <!-- voice activity -->
             <div 
-                v-show="false"
-                class="absolute bottom-0 right-0 w-full h-full border-green-800 border-4 rounded-xl">
+                v-show="isRemoteSpeaking"
+                class="absolute bottom-0 right-0 w-full h-full border-green-500 border-4 rounded-xl">
             </div>
         </div>
     </div>
