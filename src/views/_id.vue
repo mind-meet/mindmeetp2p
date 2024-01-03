@@ -44,6 +44,16 @@ onBeforeMount(async () => {
 
     await PC.init(pid)
 
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      })
+      PC.setLocalStream(stream)
+    } catch (error) {
+      toast.error(error.message)
+    }
+
     // TODO: handle errors here (if host is not available)
     if(!isHost.value) {
         console.log('calling host', hostPeerID.value)

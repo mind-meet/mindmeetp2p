@@ -80,38 +80,8 @@ export default class P2P extends EventEmitter {
                 this.peerConnection = null;
             });
 
-            try { 
-                this.localStream = await navigator.mediaDevices.getUserMedia(
-                    { 
-                    audio: true,
-                    video: true
-                    }
-                );
-
-                console.log('local stream available');
-                this.dispatchEvent('local-stream-received');
-                
-                // TODO: handle errors starting vad
-                // TODO: dispatch only one event for vad speech-detect(status)
-                // this work but is slow
-                myvad = await vad.MicVAD.new({
-                    onSpeechStart: () => {
-                        this.dispatchEvent('speech-start')
-                    },
-
-                    onSpeechEnd: (audio) => {
-                        this.dispatchEvent('speech-end')
-                    }
-                })
-
-                myvad.start()
-            
-                return true;
-            } catch(err) {
-                console.log(err);
-                reject(err);
-                return false;
-            };
+            // test
+            this.startVAD(); 
         });
     }
 
@@ -232,5 +202,36 @@ export default class P2P extends EventEmitter {
         if(this.dataChannel) {
             this.dataChannel.send(JSON.stringify(payload));
         }
+    }
+
+    startVAD = async () => {
+        try { 
+            myvad = await vad.MicVAD.new({
+                onSpeechStart: () => {
+                    this.dispatchEvent('speech-start')
+                },
+
+                onVADMisfire: () => {
+                    this.dispatchEvent('speech-end')
+                },
+
+                onSpeechEnd: (audio) => {
+                    this.dispatchEvent('speech-end')
+                }
+            })
+
+            myvad.start()
+            
+            return true;
+
+        } catch(err) {
+            return false;
+        };
+    }
+        
+
+    setLocalStream = (stream) => {
+        this.localStream = stream;
+        this.dispatchEvent('local-stream-received');
     }
 }
