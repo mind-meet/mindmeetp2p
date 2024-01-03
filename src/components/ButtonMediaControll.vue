@@ -4,15 +4,18 @@ import { Button } from './ui/button'
 const props = defineProps({
     srOnly: {
         type: String,
-        required: true
+        required: false,
+        default: ""
     },
     active: {
         type: Boolean,
-        required: true
+        required: false,
+        default: false
     },
     disabled: {
         type: Boolean,
-        required: true
+        required: false,
+        default: false
     }
 })
 
