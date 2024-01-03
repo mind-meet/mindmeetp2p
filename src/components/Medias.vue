@@ -34,10 +34,14 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    Medias
-    <div>
-        Local <Media :stream="localStream" />
-        Remote <Media :stream="remoteStream" />
+    
+    <div class="flex flex-1 space-x-4 justify-center items-center">
+        <div class="w-1/2  h-full rounded-xl bg-green-50 max-w-lg md:max-w-3xl">
+            <Media :stream="localStream" />
+        </div>
+        <div class="w-1/2  h-full rounded-xl bg-green-50 max-w-lg md:max-w-3xl">
+            <Media :stream="remoteStream" />
+        </div>
     </div>
 </template>
 

@@ -53,63 +53,66 @@ export default class P2P extends EventEmitter {
     };
 
     createPeer = async (pid) => {
-        this.peerConnection = new Peer(pid, {
-            debug: DEBUG_LEVEL,
-            config: this.configuration
-        });
-        this.remoteStream = new MediaStream();
+        return new Promise(async (resolve, reject) => {
+            this.peerConnection = new Peer(pid, {
+                debug: DEBUG_LEVEL,
+                config: this.configuration
+            });
+            this.remoteStream = new MediaStream();
 
-        this.openReceiveDataChannel();
-        this.openReiceveMediaChannel();
+            this.openReceiveDataChannel();
+            this.openReiceveMediaChannel();
 
-        this.peerConnection.on('open', () => {
-            console.log('peer opened');
-            this.dispatchEvent('peer-opened', pid);
-        });
+            this.peerConnection.on('open', () => {
+                console.log('peer opened');
+                resolve(true);
+                this.dispatchEvent('peer-opened', pid);
+            });
 
-        this.peerConnection.on('error', (err) => {
-            console.log(err);
-        });
+            this.peerConnection.on('error', (err) => {
+                reject(err);
+                console.log(err);
+            });
 
-        this.peerConnection.on('close', () => {
-            this.dispatchEvent('peer-closed');
-            this.peerConnection.destroy();
-            this.peerConnection = null;
-        });
+            this.peerConnection.on('close', () => {
+                this.dispatchEvent('peer-closed');
+                this.peerConnection.destroy();
+                this.peerConnection = null;
+            });
 
+            try { 
+                this.localStream = await navigator.mediaDevices.getUserMedia(
+                    { 
+                    audio: true,
+                    video: true
+                    }
+                );
 
-        try { 
-            this.localStream = await navigator.mediaDevices.getUserMedia(
-                { 
-                audio: true,
-                video: true
-                }
-            );
-
-            console.log('local stream available');
-            this.dispatchEvent('local-stream-received');
+                console.log('local stream available');
+                this.dispatchEvent('local-stream-received');
                 
-            // TODO: handle errors starting vad
-            // TODO: dispatch only one event for vad speech-detect(status)
-            // this work but is slow
-            myvad = await vad.MicVAD.new({
-                onSpeechStart: () => {
-                    this.dispatchEvent('speech-start')
-                },
+                // TODO: handle errors starting vad
+                // TODO: dispatch only one event for vad speech-detect(status)
+                // this work but is slow
+                myvad = await vad.MicVAD.new({
+                    onSpeechStart: () => {
+                        this.dispatchEvent('speech-start')
+                    },
 
-                onSpeechEnd: (audio) => {
-                    this.dispatchEvent('speech-end')
-                }
-            })
+                    onSpeechEnd: (audio) => {
+                        this.dispatchEvent('speech-end')
+                    }
+                })
 
-            myvad.start()
+                myvad.start()
             
-            return true;
-        } catch(err) {
-            console.log(err);
-            return false;
-        };
-
+                return true;
+            } catch(err) {
+                console.log(err);
+                reject(err);
+                return false;
+            };
+        });
     }
 
     // TODO: Refactor to use only one method for call and answer

@@ -1,10 +1,11 @@
 <script setup>
 import { Button } from '../components/ui/button'
-
+import ButtonMediaControll from '../components/ButtonMediaControll.vue'
 </script>
 
+
 <template>
-    <div>
-        <Button>Button</Button>
-    </div>
+<ButtonMediaControll active="true" disabled="false" srOnly="Hello">
+    Hello
+</ButtonMediaControll>
 </template>
