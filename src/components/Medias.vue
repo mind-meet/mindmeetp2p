@@ -8,6 +8,8 @@ import useMediaControll from '../composables/useMediaControll'
 
 const PC = inject(P2PSymbol)
 
+const isSpeaking = ref(false)
+
 const { setVideoOn, setAudioOn } = useMediaControll()
 
 const remoteStream = ref(null)
@@ -22,6 +24,13 @@ function handleLocalStreamAvailable() {
     setVideoOn(true)
 }
 
+function handleSpeechStartEnd(){
+  isSpeaking.value = !isSpeaking.value
+  if(PC.connected) PC.send({ type: 'speech', payload: isSpeaking.value })
+}
+
+PC.addEventListener("speech-start", handleSpeechStartEnd)
+PC.addEventListener("speech-end", handleSpeechStartEnd)
 
 PC.addEventListener('remote-stream-received', handleRemoteStreamAvailable)
 PC.addEventListener('local-stream-received', handleLocalStreamAvailable)
@@ -29,6 +38,8 @@ PC.addEventListener('local-stream-received', handleLocalStreamAvailable)
 onBeforeUnmount(() => {
     PC.removeEventListener('remote-stream-received', handleRemoteStreamAvailable)
     PC.removeEventListener('local-stream-received', handleLocalStreamAvailable)
+    PC.removeEventListener("speech-start")
+    PC.removeEventListener("speech-end")
 })
 
 </script>
@@ -36,11 +47,21 @@ onBeforeUnmount(() => {
 <template>
     
     <div class="flex flex-1 space-x-4 justify-center items-center">
-        <div class="w-1/2  h-full rounded-xl bg-green-50 max-w-lg md:max-w-3xl">
+        <div class="relative w-1/2  h-full rounded-xl bg-green-50 max-w-lg md:max-w-3xl">
             <Media :stream="localStream" />
+            <!-- voice activity -->
+            <div 
+                v-show="isSpeaking"
+                class="absolute bottom-0 right-0 w-full h-full border-green-500 border-4 rounded-xl">
+            </div>
         </div>
-        <div class="w-1/2  h-full rounded-xl bg-green-50 max-w-lg md:max-w-3xl">
+        <div class="relative w-1/2  h-full rounded-xl bg-green-50 max-w-lg md:max-w-3xl">
             <Media :stream="remoteStream" />
+            <!-- voice activity -->
+            <div 
+                v-show="false"
+                class="absolute bottom-0 right-0 w-full h-full border-green-800 border-4 rounded-xl">
+            </div>
         </div>
     </div>
 </template>

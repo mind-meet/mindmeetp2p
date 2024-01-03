@@ -123,11 +123,11 @@ watch(() => roomKey.value, (value) => {
             <div class="flex items-center">
                 <div class="flex border bg-white rounded-md p-1"> 
                     <input class="bg-transparent p-2 focus:outline-none" type="text" v-model="roomKey" minlength="8" maxlength="8" placeholder="Insira o ID da sala" />
-                    <Button @click="handleCopyRoomKeyToClipboard()" class="text-gray-400 bg-transparent hover:bg-transparent hover:text-gray-500" size="icon">
+                    <Button @click="handleCopyRoomKeyToClipboard()" class="text-gray-400 bg-transparent hover:bg-transparent hover:text-gray-500 w-10 h-10" size="icon">
                         <ph-copy :size="24" />
                     </Button>
                 </div>
-                <Button class="ml-2" size="icon" @click="handleClickGenerateRoomKey()" :disabled="!buttonGenerateRoomKeyClickable">
+                <Button class="ml-2 p-0 h-10 w-10" size="default" @click="handleClickGenerateRoomKey()" :disabled="!buttonGenerateRoomKeyClickable">
                     <ph-arrows-clockwise :size="32" ref="generateIcon"/> 
                 </Button>
             </div>

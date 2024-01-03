@@ -28,7 +28,7 @@ function onCanPlayThrough() {
 </script>
 <template>
 <video 
-    class="h-full w-full object-cover"
+    class="h-full w-full object-cover rounded-xl"
     v-show="!loading && playable"
     :srcObject="stream"
     autoplay 
@@ -40,7 +40,7 @@ function onCanPlayThrough() {
 ></video>
 <div
     v-if="loading"
-    class="bg-gray-800 bg-opacity-60 w-full h-full flex justify-center animate-pulse"
+    class="bg-gray-800 bg-opacity-60 w-full h-full flex justify-center animate-pulse rounded-xl"
     role="status">
 </div>  
 </template>
