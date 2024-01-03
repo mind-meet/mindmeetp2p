@@ -56,7 +56,7 @@ onBeforeUnmount(() => {
     
     <div class="flex flex-1 space-x-4 justify-center items-center">
         <div class="relative w-1/2  h-full rounded-xl bg-green-50 max-w-lg md:max-w-3xl">
-            <Media :stream="localStream" />
+            <Media :stream="localStream" :muted="true" />
             <!-- voice activity -->
             <div 
                 v-show="isSpeaking"

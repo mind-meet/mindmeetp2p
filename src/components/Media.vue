@@ -8,6 +8,12 @@ const props = defineProps({
     stream: {
         type: MediaStream,
         required: false,
+    },
+
+    muted: {
+        type: Boolean,
+        required: false,
+        default: false
     }
 })
 
@@ -31,8 +37,8 @@ function onCanPlayThrough() {
     class="h-full w-full object-cover rounded-xl"
     v-show="!loading && playable"
     :srcObject="stream"
+    :muted="muted"
     autoplay 
-    muted 
     playsinline 
     @loadedmetadata="onLoadedMetadata"
     @canplay="onCanPlay"
