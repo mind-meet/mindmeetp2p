@@ -119,7 +119,9 @@ watch(() => roomKey.value, (value) => {
 <template>
     <div class="h-screen w-full flex flex-col items-center justify-center space-y-4">
         <div>
-            <h2 class="text-center font-medium tracking-wide text-2xl text-gray-800 mb-4">MINDMEET P2P</h2>
+            <h2 class="text-center font-medium tracking-wide text-2xl text-gray-800 flex flex-col items-center">
+              <img src="@/assets/logo_white.svg" class="size-20" />
+            </h2>
             <div class="flex items-center">
                 <div class="flex border bg-white rounded-md p-1"> 
                     <input class="bg-transparent p-2 focus:outline-none" type="text" v-model="roomKey" minlength="8" maxlength="8" placeholder="Insira o ID da sala" />
